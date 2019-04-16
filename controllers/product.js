@@ -32,3 +32,22 @@ exports.getProducts = (req, res, next) =>{
         console.log(err)
     })
 }
+
+exports.deleteProduct = (req, res, next) => {
+    Product.findOneAndRemove({UPC:req.body.UPC}).then(result=>{        
+        if(result){
+            res.status(204).json({
+                status:'00',
+                message:"Delete Product Successfully"
+            })
+        }else{
+            res.status(404).json({
+                status:'01',
+                message:"Product is not found for Delete"
+            })
+        }  
+        
+    }).catch(err=>{
+        console.log(err);
+    })
+}
