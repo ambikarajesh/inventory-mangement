@@ -7,12 +7,19 @@ const PORT =  8080;
 
 const mongoDB_URI = `mongodb+srv://Ambika:Dec%401986@cluster0-btzl5.mongodb.net/Lavu_products`;
 app.use(bodyParser.json());
+app.use((req, res, next) =>{
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    next();
+})
 app.use('/', productRoute);
 
 app.use((error, req, res, next)=>{
-    res.status(error.statusCode).json({
+    res.status(error.statusCode).json({        
         status:error.status,
-        message:error.message
+        message:error.message,
+        errors:error.errors
     })
 })
 

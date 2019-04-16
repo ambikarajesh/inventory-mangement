@@ -1,7 +1,15 @@
 const moment = require('moment');
 const Product = require('../models/product');
-
-exports.createProduct = (req, res, next)=>{    
+const {validationResult} = require('express-validator/check');
+exports.createProduct = (req, res, next)=>{  
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        const error = new Error('Invalid Input');
+        error.status = "01";
+        error.errors = errors.array();
+        error.statusCode = 422;
+        throw error;
+    }  
     Product.findOne({UPC:req.body.UPC}).then(item=>{
         if(item){
             const error = new Error("Product already exist!!!");
@@ -35,11 +43,18 @@ exports.createProduct = (req, res, next)=>{
 }
 
 exports.readProducts = (req, res, next) =>{
-    Product.find().then(products=>{
+    const currentPage = req.query.page;
+    const perPage = 5;
+    let totalItems = 0;
+    Product.find().countDocuments().then(count => {
+        totalItems = count || 1;
+        return Product.find().skip((currentPage - 1) *perPage).limit(perPage);
+    }).then(products=>{
         res.status(200).json({
             status:"00",
             message:'Fetch Products Successfully',
-            products:products
+            products:products,
+            totalItems: totalItems
         })
     }).catch(err=>{
         if(!err.statusCode){
@@ -72,6 +87,14 @@ exports.deleteProduct = (req, res, next) => {
 }
 
 exports.updateProduct = (req, res, next) =>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        const error = new Error('Invalid Input');
+        error.status = "01";
+        error.errors = errors.array();
+        error.statusCode = 422;
+        throw error;
+    } 
     Product.findOne({UPC:req.params.UPC}).then(item=>{
         if(!item){
             const error = new Error("Product is not found for update");
@@ -101,6 +124,14 @@ exports.updateProduct = (req, res, next) =>{
 }
 
 exports.increaseProduct = (req, res, next)=>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        const error = new Error('Invalid Input');
+        error.status = "01";
+        error.errors = errors.array();
+        error.statusCode = 422;
+        throw error;
+    } 
     Product.findOne({UPC:req.body.UPC}).then(item=>{
         if(!item){
             const error = new Error("Product is not found for Increment");
@@ -125,6 +156,14 @@ exports.increaseProduct = (req, res, next)=>{
     })
 }
 exports.decreaseProduct = (req, res, next)=>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        const error = new Error('Invalid Input');
+        error.status = "01";
+        error.errors = errors.array();
+        error.statusCode = 422;
+        throw error;
+    } 
     Product.findOne({UPC:req.body.UPC}).then(item=>{
         if(!item){
             const error = new Error("Product is not found for Decrement");
