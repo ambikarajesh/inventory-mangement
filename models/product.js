@@ -24,7 +24,8 @@ const ProductSchema = new Schema({
         required:true
     },   
     LAST_ORDERED_AT:{
-        type:Date,        
+        type:String,
+        required:true        
     }
 }, {timestamps:true})
 

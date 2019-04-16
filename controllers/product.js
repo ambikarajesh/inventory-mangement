@@ -1,3 +1,4 @@
+const moment = require('moment');
 const Product = require('../models/product');
 
 exports.createProduct = (req, res, next)=>{    
@@ -6,17 +7,20 @@ exports.createProduct = (req, res, next)=>{
         UPC:req.body.UPC,
         MANUFACTURER:req.body.MANUFACTURER,          
         QUANTITY_ON_HAND:req.body.QUANTITY_ON_HAND,
-        STORAGE_LOCATION:req.body.STORAGE_LOCATION
-        
+        STORAGE_LOCATION:req.body.STORAGE_LOCATION,
+        LAST_ORDERED_AT: orderDate()
     });
     product.save().then(result =>{
         res.status(201).json({
             status:"00",
             message: "Create Product Successfully",
-            productId:result._id
+            product:result
         })
     }).catch(err=>{
-        console.log(err);
+        if(!err.statusCode){
+            err.statusCode = 500;            
+        }    
+        next(err);
     })
        
 }
@@ -29,25 +33,65 @@ exports.getProducts = (req, res, next) =>{
             products:products
         })
     }).catch(err=>{
-        console.log(err)
+        if(!err.statusCode){
+            err.statusCode = 500;            
+        }    
+        next(err);
     })
 }
 
 exports.deleteProduct = (req, res, next) => {
-    Product.findOneAndRemove({UPC:req.body.UPC}).then(result=>{        
-        if(result){
-            res.status(204).json({
+    Product.findByIdAndRemove(req.params.productId).then(item=>{
+            if(!item){
+                const error = new Error("Product is not found for delete");
+                error.statusCode = 404;
+                throw error;
+            }
+            res.status(200).json({
                 status:'00',
                 message:"Delete Product Successfully"
             })
-        }else{
-            res.status(404).json({
-                status:'01',
-                message:"Product is not found for Delete"
-            })
-        }  
-        
+        }).catch(err=>{
+            if(!err.statusCode){
+                err.statusCode = 500;            
+            }    
+            next(err);
+        })  
+}
+
+
+exports.updateProduct = (req, res, next) =>{
+    Product.findById(req.params.productId).then(item=>{
+        if(!item){
+            const error = new Error("Product is not found for update");
+            error.statusCode = 404;
+            throw error;
+        }
+        item.PRODUCT_NAME = req.body.PRODUCT_NAME;
+        item.UPC = req.body.UPC;
+        item.MANUFACTURER = req.body.MANUFACTURER;
+        item.QUANTITY_ON_HAND = req.body.QUANTITY_ON_HAND;
+        item.STORAGE_LOCATION = req.body.STORAGE_LOCATION;
+        return item.save();
+    }).then(result=>{
+        res.status(200).json({
+            status:'00',
+            message:"Update Product Successfully",
+            product:result
+        })
     }).catch(err=>{
-        console.log(err);
+        if(!err.statusCode){
+            err.statusCode = 500;            
+        }    
+        next(err);
     })
+}
+
+const orderDate = ()=>{
+    const date = new Date();
+    const strDate = date.toLocaleDateString();
+    const actualDate = moment(strDate, 'MM-DD-YYYY');
+    const formatDate = actualDate.format('YYYY-MM-DD');
+    const replaceStr = '/';
+    return formatDate.replace(new RegExp(replaceStr, 'g'), '-');
 }
