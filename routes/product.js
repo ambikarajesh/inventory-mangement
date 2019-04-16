@@ -3,6 +3,7 @@ const {check} = require('express-validator/check');
 const productController = require('../controllers/product');
 const router = express.Router();
 router.get('/products', productController.readProducts);
+router.get('/product', productController.readProduct);
 router.post('/product', [
                             check('PRODUCT_NAME').trim().isLength({ min: 5 }).withMessage('PRODUCT_NAME must be at least 5 chars long'),
                             check('UPC', "Invalid UPC").isInt(),

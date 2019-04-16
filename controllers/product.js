@@ -41,6 +41,27 @@ exports.createProduct = (req, res, next)=>{
     })
        
 }
+exports.readProduct = (req, res, next) =>{
+    Product.findOne({UPC:req.params.UPC}).then(product=>{
+        if(!item){
+            const error = new Error("Product is not found");
+            error.status = "01";
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            status:"00",
+            message:'Fetch Product Successfully',
+            product:product
+        })
+    }).catch(err=>{
+        if(!err.statusCode){
+            err.status = '01';
+            err.statusCode = 500;            
+        }    
+        next(err);
+    })
+}
 
 exports.readProducts = (req, res, next) =>{
     const currentPage = req.query.page;
