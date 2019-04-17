@@ -2,6 +2,7 @@ const express =require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const authRoute = require('./routes/auth');
 const fs = require('fs');
 const path = require('path');
 const helmet = require('helmet');
@@ -17,13 +18,14 @@ app.use(bodyParser.json());
 app.use((req, res, next) =>{
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 })
 app.use(compression());
 app.use(helmet());
 app.use(morgan('combined', {stream:accesssLogStream}));
 app.use('/', productRoute);
+app.use('/auth', authRoute);
 
 app.use((error, req, res, next)=>{
     res.status(error.statusCode).json({        

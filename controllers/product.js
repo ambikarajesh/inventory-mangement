@@ -28,7 +28,7 @@ exports.createProduct = (req, res, next)=>{
         product.save().then(result =>{
             res.status(201).json({
                 status:"00",
-                message: "Create Product Successfully",
+                message: "Created Product Successfully",
                 product:result
             })
         })
@@ -42,7 +42,7 @@ exports.createProduct = (req, res, next)=>{
        
 }
 exports.readProduct = (req, res, next) =>{
-    Product.findOne({UPC:req.params.UPC}).then(product=>{
+    Product.findOne({UPC:req.params.UPC}).then(item=>{
         if(!item){
             const error = new Error("Product is not found");
             error.status = "01";
@@ -52,7 +52,7 @@ exports.readProduct = (req, res, next) =>{
         res.status(200).json({
             status:"00",
             message:'Fetch Product Successfully',
-            product:product
+            product:item
         })
     }).catch(err=>{
         if(!err.statusCode){
@@ -132,7 +132,7 @@ exports.updateProduct = (req, res, next) =>{
     }).then(result=>{
         res.status(200).json({
             status:'00',
-            message:"Update Product Successfully",
+            message:"Updated Product Successfully",
             product:result
         })
     }).catch(err=>{
@@ -161,6 +161,7 @@ exports.increaseProduct = (req, res, next)=>{
             throw error;
         }        
         item.QUANTITY_ON_HAND = item.QUANTITY_ON_HAND + +req.body.QUANTITY;
+        item.LAST_ORDERED_AT = orderDate();
         return item.save();
     }).then(result=>{
         res.status(200).json({
@@ -214,6 +215,8 @@ exports.decreaseProduct = (req, res, next)=>{
         next(err);
     })
 }
+
+
 const orderDate = ()=>{
     const date = new Date();
     const strDate = date.toLocaleDateString();
